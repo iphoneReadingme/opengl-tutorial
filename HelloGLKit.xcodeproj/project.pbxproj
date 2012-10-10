@@ -16,6 +16,10 @@
 		01FA002E16250D4800577F03 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 01FA002D16250D4800577F03 /* Default.png */; };
 		01FA003016250D4800577F03 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 01FA002F16250D4800577F03 /* Default@2x.png */; };
 		01FA003216250D4800577F03 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 01FA003116250D4800577F03 /* Default-568h@2x.png */; };
+		01FA003916250DD700577F03 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01FA003816250DD700577F03 /* OpenGLES.framework */; };
+		01FA003B16250DDD00577F03 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01FA003A16250DDD00577F03 /* GLKit.framework */; };
+		01FA003D16250DE900577F03 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01FA003C16250DE900577F03 /* QuartzCore.framework */; };
+		01FA004016250FF300577F03 /* HGLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 01FA003F16250FF300577F03 /* HGLViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +36,11 @@
 		01FA002D16250D4800577F03 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		01FA002F16250D4800577F03 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		01FA003116250D4800577F03 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		01FA003816250DD700577F03 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		01FA003A16250DDD00577F03 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		01FA003C16250DE900577F03 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		01FA003E16250FF300577F03 /* HGLViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HGLViewController.h; path = Controllers/HGLViewController.h; sourceTree = "<group>"; };
+		01FA003F16250FF300577F03 /* HGLViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = HGLViewController.m; path = Controllers/HGLViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +48,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01FA003D16250DE900577F03 /* QuartzCore.framework in Frameworks */,
+				01FA003B16250DDD00577F03 /* GLKit.framework in Frameworks */,
+				01FA003916250DD700577F03 /* OpenGLES.framework in Frameworks */,
 				01FA001C16250D4700577F03 /* UIKit.framework in Frameworks */,
 				01FA001E16250D4700577F03 /* Foundation.framework in Frameworks */,
 				01FA002016250D4700577F03 /* CoreGraphics.framework in Frameworks */,
@@ -68,6 +80,9 @@
 		01FA001A16250D4700577F03 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				01FA003C16250DE900577F03 /* QuartzCore.framework */,
+				01FA003A16250DDD00577F03 /* GLKit.framework */,
+				01FA003816250DD700577F03 /* OpenGLES.framework */,
 				01FA001B16250D4700577F03 /* UIKit.framework */,
 				01FA001D16250D4700577F03 /* Foundation.framework */,
 				01FA001F16250D4700577F03 /* CoreGraphics.framework */,
@@ -80,6 +95,8 @@
 			children = (
 				01FA002A16250D4800577F03 /* AppDelegate.h */,
 				01FA002B16250D4800577F03 /* AppDelegate.m */,
+				01FA003E16250FF300577F03 /* HGLViewController.h */,
+				01FA003F16250FF300577F03 /* HGLViewController.m */,
 				01FA002216250D4800577F03 /* Supporting Files */,
 			);
 			path = HelloGLKit;
@@ -166,6 +183,7 @@
 			files = (
 				01FA002816250D4800577F03 /* main.m in Sources */,
 				01FA002C16250D4800577F03 /* AppDelegate.m in Sources */,
+				01FA004016250FF300577F03 /* HGLViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,7 +257,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "HelloGLKit/HelloGLKit-Prefix.pch";
 				INFOPLIST_FILE = "HelloGLKit/HelloGLKit-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -250,7 +270,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "HelloGLKit/HelloGLKit-Prefix.pch";
 				INFOPLIST_FILE = "HelloGLKit/HelloGLKit-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
