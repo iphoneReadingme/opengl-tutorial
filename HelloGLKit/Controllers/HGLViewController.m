@@ -8,14 +8,35 @@
 
 #import "HGLViewController.h"
 
+typedef struct {
+    float Position[3];
+    float Color[4];
+} Vertex;
+
+const Vertex Vertices[] = {
+    { {1, -1, 0}, {1, 0, 0, 1} },
+    { {1, 1, 0}, {0, 1, 0, 1} },
+    { {-1, 1, 0}, {0, 0, 1, 1} },
+    { {-1, -1, 0}, {0, 0, 0, 1} }
+};
+
+const GLubyte Indices[] = {
+    0, 1, 2,
+    2, 3, 0
+};
+
 @interface HGLViewController ()
 
-@property (nonatomic, strong) EAGLContext *context;
+@property (strong, nonatomic) EAGLContext *context;
 
-@property (assign) BOOL shouldIncrease;
-@property (assign) float redValue;
+@property (readonly, strong, nonatomic) GLKView *glView;
 
-@property (readonly, nonatomic, strong) GLKView *glView;
+@property (assign) GLuint vertexBuffer;
+@property (assign) GLuint indexBuffer;
+
+@property (strong, nonatomic) GLKBaseEffect *effect;
+
+@property (assign) float rotation;
 
 @end
 
@@ -61,12 +82,25 @@
 {
     [EAGLContext setCurrentContext:self.context];
     
-    self.glView.enableSetNeedsDisplay = NO;
+    self.effect = [[GLKBaseEffect alloc] init];
+    
+    glGenBuffers(1, &_vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+    
+    glGenBuffers(1, &_indexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 }
 
 - (void)teardownGL
 {
     [EAGLContext setCurrentContext:self.context];
+    
+    glDeleteBuffers(1, &_vertexBuffer);
+    glDeleteBuffers(1, &_indexBuffer);
+    
+    self.effect = nil;
 }
 
 - (GLKView *)glView
@@ -78,28 +112,32 @@
 
 - (void)update
 {
-    [self.glView display];
+    float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.f), aspect, 4.f, 10.f);
+    self.effect.transform.projectionMatrix = projectionMatrix;
+    
+    GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.f, 0.f, -6.f);
+    _rotation += 90 * self.timeSinceLastUpdate;
+    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, GLKMathDegreesToRadians(_rotation), 0, 0, 1);
+    self.effect.transform.modelviewMatrix = modelViewMatrix;
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
-    if (self.shouldIncrease)
-        self.redValue += 1.0 * self.timeSinceLastUpdate;
-    else
-        self.redValue -= 1.0 * self.timeSinceLastUpdate;
+    [self.effect prepareToDraw];
     
-    if (self.redValue >= 1.0) {
-        self.redValue = 1.0;
-        self.shouldIncrease = NO;
-    }
-    
-    if (self.redValue <= 0.0) {
-        self.redValue = 0.0;
-        self.shouldIncrease = YES;
-    }    
-    
-    glClearColor(self.redValue, 0.0, 0.0, 1.0);
+    glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
+    
+    glEnableVertexAttribArray(GLKVertexAttribPosition);
+    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, Position));
+    glEnableVertexAttribArray(GLKVertexAttribColor);
+    glVertexAttribPointer(GLKVertexAttribColor, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, Color));
+    
+    glDrawElements(GL_TRIANGLES, sizeof(Indices) / sizeof(Indices[0]), GL_UNSIGNED_BYTE, 0);
 }
 
 @end
