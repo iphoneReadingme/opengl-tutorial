@@ -14,15 +14,29 @@ typedef struct {
 } Vertex;
 
 const Vertex Vertices[] = {
-    { {1, -1, 0}, {1, 0, 0, 1} },
-    { {1, 1, 0}, {0, 1, 0, 1} },
-    { {-1, 1, 0}, {0, 0, 1, 1} },
-    { {-1, -1, 0}, {0, 0, 0, 1} }
+    { {1, -1, -1}, {1, 0, 0, 1} },
+    { {1, 1, -1}, {0, 1, 0, 1} },
+    { {-1, 1, -1}, {0, 0, 1, 1} },
+    { {-1, -1, -1}, {0, 0, 0, 1} },
+    { {1, -1, 1}, {1, 0, 0, 1} },
+    { {1, 1, 1}, {0, 1, 0, 1} },
+    { {-1, 1, 1}, {0, 0, 1, 1} },
+    { {-1, -1, 1}, {0, 0, 0, 1} }
 };
 
 const GLubyte Indices[] = {
     0, 1, 2,
-    2, 3, 0
+    2, 3, 0,
+    4, 5, 6,
+    6, 7, 4,
+    0, 1, 5,
+    5, 4, 0,
+    3, 2, 6,
+    6, 7, 3,
+    1, 2, 6,
+    6, 5, 1,
+    0, 3, 7,
+    7, 4, 0
 };
 
 @interface HGLViewController ()
@@ -37,6 +51,7 @@ const GLubyte Indices[] = {
 @property (strong, nonatomic) GLKBaseEffect *effect;
 
 @property (assign) float rotation;
+@property (assign) GLKMatrix4 rotationMatrix;
 
 @end
 
@@ -91,6 +106,8 @@ const GLubyte Indices[] = {
     glGenBuffers(1, &_indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+    
+    self.rotationMatrix = GLKMatrix4Identity;
 }
 
 - (void)teardownGL
@@ -117,8 +134,7 @@ const GLubyte Indices[] = {
     self.effect.transform.projectionMatrix = projectionMatrix;
     
     GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.f, 0.f, -6.f);
-    _rotation += 90 * self.timeSinceLastUpdate;
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, GLKMathDegreesToRadians(_rotation), 0, 0, 1);
+    modelViewMatrix = GLKMatrix4Multiply(modelViewMatrix, _rotationMatrix);
     self.effect.transform.modelviewMatrix = modelViewMatrix;
 }
 
@@ -138,6 +154,30 @@ const GLubyte Indices[] = {
     glVertexAttribPointer(GLKVertexAttribColor, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, Color));
     
     glDrawElements(GL_TRIANGLES, sizeof(Indices) / sizeof(Indices[0]), GL_UNSIGNED_BYTE, 0);
+}
+
+#pragma mark - UIResponder
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    UITouch * touch = [touches anyObject];
+    CGPoint location = [touch locationInView:self.view];
+    CGPoint lastLoc = [touch previousLocationInView:self.view];
+    CGPoint diff = CGPointMake(lastLoc.x - location.x, lastLoc.y - location.y);
+    
+    float rotX = -1 * GLKMathDegreesToRadians(diff.y / 2.0);
+    float rotY = -1 * GLKMathDegreesToRadians(diff.x / 2.0);
+    
+    bool isInvertible;
+    GLKVector3 xAxis = GLKMatrix4MultiplyVector3(GLKMatrix4Invert(_rotationMatrix, &isInvertible), GLKVector3Make(1, 0, 0));
+    _rotationMatrix = GLKMatrix4Rotate(_rotationMatrix, rotX, xAxis.x, xAxis.y, xAxis.z);
+    GLKVector3 yAxis = GLKMatrix4MultiplyVector3(GLKMatrix4Invert(_rotationMatrix, &isInvertible), GLKVector3Make(0, 1, 0));
+    _rotationMatrix = GLKMatrix4Rotate(_rotationMatrix, rotY, yAxis.x, yAxis.y, yAxis.z);
 }
 
 @end
