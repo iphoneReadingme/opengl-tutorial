@@ -25,16 +25,22 @@ const Vertex Vertices[] = {
 };
 
 const GLubyte Indices[] = {
+    // Back
     0, 1, 2,
     2, 3, 0,
+    // Front
     4, 5, 6,
     6, 7, 4,
+    // Right
     0, 1, 5,
     5, 4, 0,
+    // Left
     3, 2, 6,
     6, 7, 3,
+    // Top
     1, 2, 6,
     6, 5, 1,
+    // Bottom
     0, 3, 7,
     7, 4, 0
 };
