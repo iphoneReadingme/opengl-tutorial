@@ -11,38 +11,61 @@
 typedef struct {
     float Position[3];
     float Color[4];
+    float TexCoord[2];
 } Vertex;
 
 const Vertex Vertices[] = {
-    { {1, -1, -1}, {1, 0, 0, 1} },
-    { {1, 1, -1}, {0, 1, 0, 1} },
-    { {-1, 1, -1}, {0, 0, 1, 1} },
-    { {-1, -1, -1}, {0, 0, 0, 1} },
-    { {1, -1, 1}, {1, 0, 0, 1} },
-    { {1, 1, 1}, {0, 1, 0, 1} },
-    { {-1, 1, 1}, {0, 0, 1, 1} },
-    { {-1, -1, 1}, {0, 0, 0, 1} }
+    // Front
+    {{1, -1, 1}, {1, 0, 0, 1}, {1, 0}},
+    {{1, 1, 1}, {0, 1, 0, 1}, {1, 1}},
+    {{-1, 1, 1}, {0, 0, 1, 1}, {0, 1}},
+    {{-1, -1, 1}, {0, 0, 0, 1}, {0, 0}},
+    // Back
+    {{1, 1, -1}, {1, 0, 0, 1}, {0, 1}},
+    {{-1, -1, -1}, {0, 1, 0, 1}, {1, 0}},
+    {{1, -1, -1}, {0, 0, 1, 1}, {0, 0}},
+    {{-1, 1, -1}, {0, 0, 0, 1}, {1, 1}},
+    // Left
+    {{-1, -1, 1}, {1, 0, 0, 1}, {1, 0}},
+    {{-1, 1, 1}, {0, 1, 0, 1}, {1, 1}},
+    {{-1, 1, -1}, {0, 0, 1, 1}, {0, 1}},
+    {{-1, -1, -1}, {0, 0, 0, 1}, {0, 0}},
+    // Right
+    {{1, -1, -1}, {1, 0, 0, 1}, {1, 0}},
+    {{1, 1, -1}, {0, 1, 0, 1}, {1, 1}},
+    {{1, 1, 1}, {0, 0, 1, 1}, {0, 1}},
+    {{1, -1, 1}, {0, 0, 0, 1}, {0, 0}},
+    // Top
+    {{1, 1, 1}, {1, 0, 0, 1}, {1, 0}},
+    {{1, 1, -1}, {0, 1, 0, 1}, {1, 1}},
+    {{-1, 1, -1}, {0, 0, 1, 1}, {0, 1}},
+    {{-1, 1, 1}, {0, 0, 0, 1}, {0, 0}},
+    // Bottom
+    {{1, -1, -1}, {1, 0, 0, 1}, {1, 0}},
+    {{1, -1, 1}, {0, 1, 0, 1}, {1, 1}},
+    {{-1, -1, 1}, {0, 0, 1, 1}, {0, 1}},
+    {{-1, -1, -1}, {0, 0, 0, 1}, {0, 0}}
 };
 
 const GLubyte Indices[] = {
-    // Back
+    // Front
     0, 1, 2,
     2, 3, 0,
-    // Front
-    4, 5, 6,
-    6, 7, 4,
-    // Right
-    0, 1, 5,
-    5, 4, 0,
+    // Back
+    4, 6, 5,
+    4, 5, 7,
     // Left
-    3, 2, 6,
-    6, 7, 3,
+    8, 9, 10,
+    10, 11, 8,
+    // Right
+    12, 13, 14,
+    14, 15, 12,
     // Top
-    1, 2, 6,
-    6, 5, 1,
+    16, 17, 18,
+    18, 19, 16,
     // Bottom
-    0, 3, 7,
-    7, 4, 0
+    20, 21, 22,
+    22, 23, 20
 };
 
 @interface HGLViewController ()
@@ -53,6 +76,8 @@ const GLubyte Indices[] = {
 
 @property (assign) GLuint vertexBuffer;
 @property (assign) GLuint indexBuffer;
+
+@property (assign) GLuint vertexArray;
 
 @property (strong, nonatomic) GLKBaseEffect *effect;
 
@@ -88,6 +113,10 @@ const GLubyte Indices[] = {
     CGRect screenBounds = [[UIScreen mainScreen] bounds];
     self.view = [[GLKView alloc] initWithFrame:screenBounds context:self.context];
     
+    GLKView *view = (GLKView *)self.view;
+    view.context = self.context;
+    view.drawableMultisample = GLKViewDrawableMultisample4X;
+    
     [self setupGL];
 }
 
@@ -103,7 +132,22 @@ const GLubyte Indices[] = {
 {
     [EAGLContext setCurrentContext:self.context];
     
+    glEnable(GL_CULL_FACE);
+    
     self.effect = [[GLKBaseEffect alloc] init];
+    
+    NSDictionary *options = @{ GLKTextureLoaderOriginBottomLeft : @(YES) };
+    
+    NSError *error;
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"tile_floor" ofType:@"png"];
+    GLKTextureInfo *info = [GLKTextureLoader textureWithContentsOfFile:path options:options error:&error];
+    if (error != nil)
+        NSLog(@"Error loading texture %@", error);
+    self.effect.texture2d0.name = info.name;
+    self.effect.texture2d0.enabled = true;
+    
+    glGenVertexArraysOES(1, &_vertexArray);
+    glBindVertexArrayOES(_vertexArray);
     
     glGenBuffers(1, &_vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
@@ -112,6 +156,15 @@ const GLubyte Indices[] = {
     glGenBuffers(1, &_indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+    
+    glEnableVertexAttribArray(GLKVertexAttribPosition);
+    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, Position));
+    glEnableVertexAttribArray(GLKVertexAttribColor);
+    glVertexAttribPointer(GLKVertexAttribColor, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, Color));
+    glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
+    glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, TexCoord));
+    
+    glBindVertexArrayOES(0);
     
     self.rotationMatrix = GLKMatrix4Identity;
 }
@@ -146,19 +199,12 @@ const GLubyte Indices[] = {
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
+    glClearColor(1.f, 0.f, 0.f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT);
+ 
     [self.effect prepareToDraw];
     
-    glClearColor(0.f, 0.f, 0.f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
-    
-    glEnableVertexAttribArray(GLKVertexAttribPosition);
-    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, Position));
-    glEnableVertexAttribArray(GLKVertexAttribColor);
-    glVertexAttribPointer(GLKVertexAttribColor, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, Color));
-    
+    glBindVertexArrayOES(_vertexArray);    
     glDrawElements(GL_TRIANGLES, sizeof(Indices) / sizeof(Indices[0]), GL_UNSIGNED_BYTE, 0);
 }
 

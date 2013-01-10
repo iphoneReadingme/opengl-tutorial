@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		014D7803169F064900672323 /* tile_floor.png in Resources */ = {isa = PBXBuildFile; fileRef = 014D7802169F064900672323 /* tile_floor.png */; };
 		01FA001C16250D4700577F03 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01FA001B16250D4700577F03 /* UIKit.framework */; };
 		01FA001E16250D4700577F03 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01FA001D16250D4700577F03 /* Foundation.framework */; };
 		01FA002016250D4700577F03 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01FA001F16250D4700577F03 /* CoreGraphics.framework */; };
@@ -23,6 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		014D7802169F064900672323 /* tile_floor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tile_floor.png; sourceTree = "<group>"; };
 		01FA001716250D4700577F03 /* HelloGLKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloGLKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		01FA001B16250D4700577F03 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		01FA001D16250D4700577F03 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -109,6 +111,7 @@
 				01FA002416250D4800577F03 /* InfoPlist.strings */,
 				01FA002716250D4800577F03 /* main.m */,
 				01FA002916250D4800577F03 /* HelloGLKit-Prefix.pch */,
+				014D7802169F064900672323 /* tile_floor.png */,
 				01FA002D16250D4800577F03 /* Default.png */,
 				01FA002F16250D4800577F03 /* Default@2x.png */,
 				01FA003116250D4800577F03 /* Default-568h@2x.png */,
@@ -171,6 +174,7 @@
 				01FA002E16250D4800577F03 /* Default.png in Resources */,
 				01FA003016250D4800577F03 /* Default@2x.png in Resources */,
 				01FA003216250D4800577F03 /* Default-568h@2x.png in Resources */,
+				014D7803169F064900672323 /* tile_floor.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,6 +300,7 @@
 				01FA003716250D4800577F03 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
