@@ -236,9 +236,9 @@ const GLubyte Indices[] = {
         P.z = sqrt(radius2 - length2);
     else
     {
-        P.x *= radius / sqrt(length2);
-        P.y *= radius / sqrt(length2);
-        P.z = 0;
+        P.z = radius2 / (2.0 * sqrt(length2));
+        float length = sqrt(length2 + P.z * P.z);
+        P = GLKVector3DivideScalar(P, length);
     }
     
     return GLKVector3Normalize(P);
