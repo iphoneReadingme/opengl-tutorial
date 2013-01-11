@@ -84,6 +84,12 @@ const GLubyte Indices[] = {
 @property (assign) float rotation;
 @property (assign) GLKMatrix4 rotationMatrix;
 
+@property (assign) GLKVector3 anchorPosition;
+@property (assign) GLKVector3 currentPosition;
+
+@property (assign) GLKQuaternion quatStart;
+@property (assign) GLKQuaternion quat;
+
 @end
 
 @implementation HGLViewController
@@ -167,6 +173,9 @@ const GLubyte Indices[] = {
     glBindVertexArrayOES(0);
     
     self.rotationMatrix = GLKMatrix4Identity;
+    
+    self.quatStart = GLKQuaternionMake(0, 0, 0, 1);
+    self.quat = GLKQuaternionMake(0, 0, 0, 1);
 }
 
 - (void)teardownGL
@@ -193,7 +202,8 @@ const GLubyte Indices[] = {
     self.effect.transform.projectionMatrix = projectionMatrix;
     
     GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.f, 0.f, -6.f);
-    modelViewMatrix = GLKMatrix4Multiply(modelViewMatrix, _rotationMatrix);
+    GLKMatrix4 rotation = GLKMatrix4MakeWithQuaternion(_quat);
+    modelViewMatrix = GLKMatrix4Multiply(modelViewMatrix, rotation);
     self.effect.transform.modelviewMatrix = modelViewMatrix;
 }
 
@@ -208,16 +218,62 @@ const GLubyte Indices[] = {
     glDrawElements(GL_TRIANGLES, sizeof(Indices) / sizeof(Indices[0]), GL_UNSIGNED_BYTE, 0);
 }
 
+#pragma mark - 2D to 3D projection
+
+- (GLKVector3)projectOntoSurface:(GLKVector3)touchPoint
+{
+    float radius = self.view.bounds.size.width/3;
+    GLKVector3 center = GLKVector3Make(self.view.bounds.size.width/2, self.view.bounds.size.height/2, 0);
+    GLKVector3 P = GLKVector3Subtract(touchPoint, center);
+    
+    // Flip the y-axis because pixel coords increase toward the bottom.
+    P = GLKVector3Make(P.x, P.y * -1, P.z);
+    
+    float radius2 = radius * radius;
+    float length2 = P.x*P.x + P.y*P.y;
+    
+    if (length2 <= radius2)
+        P.z = sqrt(radius2 - length2);
+    else
+    {
+        P.x *= radius / sqrt(length2);
+        P.y *= radius / sqrt(length2);
+        P.z = 0;
+    }
+    
+    return GLKVector3Normalize(P);
+}
+
+- (void)computeIncremental
+{    
+    GLKVector3 axis = GLKVector3CrossProduct(_anchorPosition, _currentPosition);
+    float dot = GLKVector3DotProduct(_anchorPosition, _currentPosition);
+    float angle = acosf(dot);
+    
+    GLKQuaternion Qrot = GLKQuaternionMakeWithAngleAndVector3Axis(angle * 2, axis);
+    Qrot = GLKQuaternionNormalize(Qrot);
+    
+    _quat = GLKQuaternionMultiply(Qrot, _quatStart);
+}
+
 #pragma mark - UIResponder
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    UITouch *touch = [touches anyObject];
+    CGPoint location = [touch locationInView:self.view];
     
+    _anchorPosition = GLKVector3Make(location.x, location.y, 0);
+    _anchorPosition = [self projectOntoSurface:_anchorPosition];
+    
+    _currentPosition = _anchorPosition;
+    
+    _quatStart = _quat;
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    UITouch * touch = [touches anyObject];
+    UITouch *touch = [touches anyObject];
     CGPoint location = [touch locationInView:self.view];
     CGPoint lastLoc = [touch previousLocationInView:self.view];
     CGPoint diff = CGPointMake(lastLoc.x - location.x, lastLoc.y - location.y);
@@ -230,6 +286,11 @@ const GLubyte Indices[] = {
     _rotationMatrix = GLKMatrix4Rotate(_rotationMatrix, rotX, xAxis.x, xAxis.y, xAxis.z);
     GLKVector3 yAxis = GLKMatrix4MultiplyVector3(GLKMatrix4Invert(_rotationMatrix, &isInvertible), GLKVector3Make(0, 1, 0));
     _rotationMatrix = GLKMatrix4Rotate(_rotationMatrix, rotY, yAxis.x, yAxis.y, yAxis.z);
+    
+    _currentPosition = GLKVector3Make(location.x, location.y, 0);
+    _currentPosition = [self projectOntoSurface:_currentPosition];
+    
+    [self computeIncremental];
 }
 
 @end
