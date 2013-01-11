@@ -90,6 +90,12 @@ const GLubyte Indices[] = {
 @property (assign) GLKQuaternion quatStart;
 @property (assign) GLKQuaternion quat;
 
+@property (assign) BOOL slerping;
+@property (assign) float slerp;
+@property (assign) float slerpMax;
+@property (assign) GLKQuaternion slerpStart;
+@property (assign) GLKQuaternion slerpEnd;
+
 @end
 
 @implementation HGLViewController
@@ -176,6 +182,10 @@ const GLubyte Indices[] = {
     
     self.quatStart = GLKQuaternionMake(0, 0, 0, 1);
     self.quat = GLKQuaternionMake(0, 0, 0, 1);
+    
+    UITapGestureRecognizer *doubleTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTap:)];
+    doubleTapRecognizer.numberOfTapsRequired = 2;
+    [self.view addGestureRecognizer:doubleTapRecognizer];
 }
 
 - (void)teardownGL
@@ -200,6 +210,18 @@ const GLubyte Indices[] = {
     float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
     GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.f), aspect, 4.f, 10.f);
     self.effect.transform.projectionMatrix = projectionMatrix;
+    
+    if (_slerping)
+    {    
+        _slerp += self.timeSinceLastUpdate;
+        float slerpAmount = _slerp / _slerpMax;
+        if (slerpAmount > 1.0) {
+            slerpAmount = 1.0;
+            _slerping = NO;
+        }
+        
+        _quat = GLKQuaternionSlerp(_slerpStart, _slerpEnd, slerpAmount);
+    }
     
     GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.f, 0.f, -6.f);
     GLKMatrix4 rotation = GLKMatrix4MakeWithQuaternion(_quat);
@@ -254,6 +276,17 @@ const GLubyte Indices[] = {
     Qrot = GLKQuaternionNormalize(Qrot);
     
     _quat = GLKQuaternionMultiply(Qrot, _quatStart);
+}
+
+#pragma mark - Gestures
+
+- (void)doubleTap:(UITapGestureRecognizer *)recognizer
+{
+    _slerping = YES;
+    _slerp = 0.f;
+    _slerpMax = 1.f;
+    _slerpStart = _quat;
+    _slerpEnd = GLKQuaternionMake(0, 0, 0, 1);
 }
 
 #pragma mark - UIResponder
