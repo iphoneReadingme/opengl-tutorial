@@ -8,6 +8,8 @@
 
 #import "HGLViewController.h"
 
+#define TEX_COORD_MAX 4
+
 typedef struct {
     float Position[3];
     float Color[4];
@@ -16,34 +18,34 @@ typedef struct {
 
 const Vertex Vertices[] = {
     // Front
-    {{1, -1, 1}, {1, 0, 0, 1}, {1, 0}},
-    {{1, 1, 1}, {0, 1, 0, 1}, {1, 1}},
-    {{-1, 1, 1}, {0, 0, 1, 1}, {0, 1}},
+    {{1, -1, 1}, {1, 0, 0, 1}, {TEX_COORD_MAX, 0}},
+    {{1, 1, 1}, {0, 1, 0, 1}, {TEX_COORD_MAX, TEX_COORD_MAX}},
+    {{-1, 1, 1}, {0, 0, 1, 1}, {0, TEX_COORD_MAX}},
     {{-1, -1, 1}, {0, 0, 0, 1}, {0, 0}},
     // Back
-    {{1, 1, -1}, {1, 0, 0, 1}, {0, 1}},
-    {{-1, -1, -1}, {0, 1, 0, 1}, {1, 0}},
+    {{1, 1, -1}, {1, 0, 0, 1}, {0, TEX_COORD_MAX}},
+    {{-1, -1, -1}, {0, 1, 0, 1}, {TEX_COORD_MAX, 0}},
     {{1, -1, -1}, {0, 0, 1, 1}, {0, 0}},
-    {{-1, 1, -1}, {0, 0, 0, 1}, {1, 1}},
+    {{-1, 1, -1}, {0, 0, 0, 1}, {TEX_COORD_MAX, TEX_COORD_MAX}},
     // Left
-    {{-1, -1, 1}, {1, 0, 0, 1}, {1, 0}},
-    {{-1, 1, 1}, {0, 1, 0, 1}, {1, 1}},
-    {{-1, 1, -1}, {0, 0, 1, 1}, {0, 1}},
+    {{-1, -1, 1}, {1, 0, 0, 1}, {TEX_COORD_MAX, 0}},
+    {{-1, 1, 1}, {0, 1, 0, 1}, {TEX_COORD_MAX, TEX_COORD_MAX}},
+    {{-1, 1, -1}, {0, 0, 1, 1}, {0, TEX_COORD_MAX}},
     {{-1, -1, -1}, {0, 0, 0, 1}, {0, 0}},
     // Right
-    {{1, -1, -1}, {1, 0, 0, 1}, {1, 0}},
-    {{1, 1, -1}, {0, 1, 0, 1}, {1, 1}},
-    {{1, 1, 1}, {0, 0, 1, 1}, {0, 1}},
+    {{1, -1, -1}, {1, 0, 0, 1}, {TEX_COORD_MAX, 0}},
+    {{1, 1, -1}, {0, 1, 0, 1}, {TEX_COORD_MAX, TEX_COORD_MAX}},
+    {{1, 1, 1}, {0, 0, 1, 1}, {0, TEX_COORD_MAX}},
     {{1, -1, 1}, {0, 0, 0, 1}, {0, 0}},
     // Top
-    {{1, 1, 1}, {1, 0, 0, 1}, {1, 0}},
-    {{1, 1, -1}, {0, 1, 0, 1}, {1, 1}},
-    {{-1, 1, -1}, {0, 0, 1, 1}, {0, 1}},
+    {{1, 1, 1}, {1, 0, 0, 1}, {TEX_COORD_MAX, 0}},
+    {{1, 1, -1}, {0, 1, 0, 1}, {TEX_COORD_MAX, TEX_COORD_MAX}},
+    {{-1, 1, -1}, {0, 0, 1, 1}, {0, TEX_COORD_MAX}},
     {{-1, 1, 1}, {0, 0, 0, 1}, {0, 0}},
     // Bottom
-    {{1, -1, -1}, {1, 0, 0, 1}, {1, 0}},
-    {{1, -1, 1}, {0, 1, 0, 1}, {1, 1}},
-    {{-1, -1, 1}, {0, 0, 1, 1}, {0, 1}},
+    {{1, -1, -1}, {1, 0, 0, 1}, {TEX_COORD_MAX, 0}},
+    {{1, -1, 1}, {0, 1, 0, 1}, {TEX_COORD_MAX, TEX_COORD_MAX}},
+    {{-1, -1, 1}, {0, 0, 1, 1}, {0, TEX_COORD_MAX}},
     {{-1, -1, -1}, {0, 0, 0, 1}, {0, 0}}
 };
 
@@ -235,6 +237,9 @@ const GLubyte Indices[] = {
     glClear(GL_COLOR_BUFFER_BIT);
  
     [self.effect prepareToDraw];
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     
     glBindVertexArrayOES(_vertexArray);    
     glDrawElements(GL_TRIANGLES, sizeof(Indices) / sizeof(Indices[0]), GL_UNSIGNED_BYTE, 0);
